@@ -4,40 +4,60 @@
       <v-row class="ma-5">
         <v-col>
           <v-card>
-            <v-toolbar color="blue darken-4" dark>
-              <v-toolbar-side-icon></v-toolbar-side-icon>
+            <v-toolbar color="deep-purple accent-4" dark>
               <v-toolbar-title class="headline">Duriseo</v-toolbar-title>
 
               <v-spacer></v-spacer>
-
               <v-tooltip bottom>
                 <template v-slot:activator="{ on }">
                   <v-btn icon @click="isDark = !isDark" v-on="on">
                     <v-icon v-model="isDark">{{
-                      !isDark ? 'mdi-weather-night' : 'mdi-weather-cloudy'
+                      !isDark ? 'mdi-weather-night' : 'mdi-white-balance-sunny'
                     }}</v-icon>
                   </v-btn>
                 </template>
                 <span>
-                  {{ isDark ? 'light mode' : 'dark mode' }}
+                  {{ isDark ? 'Light Mode' : 'Dark Mode' }}
                 </span>
               </v-tooltip>
+
+              <auth-dialog v-model="showAuthDialog" />
+
+              <logout-dialog v-model="showLogoutDialog" />
+
+              <v-menu offset-y>
+                <template v-slot:activator="{ on, attrs }">
+                  <v-btn icon v-bind="attrs" v-on="on">
+                    <v-icon>mdi-dots-vertical</v-icon>
+                  </v-btn>
+                </template>
+                <v-list>
+                  <v-list-item
+                    v-for="(item, index) in menuItems"
+                    :key="index"
+                    @click="item.action"
+                  >
+                    <v-list-item-title>{{ item.title }}</v-list-item-title>
+                  </v-list-item>
+                </v-list>
+              </v-menu>
             </v-toolbar>
 
             <v-list two-line subheader>
-              <v-subheader class="headline">{{
-                formattedDate(this.todayDate)
-              }}</v-subheader>
-              <p class="mx-12 text-right">
-                <b>{{ todos.length }}</b> Tasks
-              </p>
-
+              <div class="d-flex justify-space-between my-4" flat tile>
+                <v-subheader class="headline">{{
+                  formattedDate(todayDate)
+                }}</v-subheader>
+                <p class="text-right my-3 mx-6">
+                  <b>{{ todos.length }}</b> Tasks
+                </p>
+              </div>
               <v-list-item>
                 <v-list-item-content>
                   <v-list-item-title>
                     <v-text-field
-                      v-model="newTodo"
                       id="newTodo"
+                      v-model="newTodo"
                       name="newTodo"
                       label="Type your task"
                       @keyup.enter="addTodo"
@@ -48,52 +68,19 @@
             </v-list>
 
             <v-list subheader two-line flat>
-              <v-subheader class="subheading" v-if="todos.length == 0"
+              <v-subheader v-if="todos.length == 0" class="subheading"
                 >You have {{ todos.length }} Tasks, add some</v-subheader
               >
-              <v-subheader class="subheading" v-else-if="todos.length == 1"
+              <v-subheader v-else-if="todos.length == 1" class="subheading"
                 >Your Tasks</v-subheader
               >
 
               <v-list-item-group>
-                <v-list-item v-for="(todo, index) in todos" :key="index">
-                  <v-list-item-action>
-                    <v-checkbox
-                      v-model="todo.isDone"
-                      @change="updateTodo(todo)"
-                    ></v-checkbox>
-                  </v-list-item-action>
-
-                  <v-list-item-content @click="toggleTodoDone(todo)">
-                    <v-list-item-title
-                      :class="{
-                        'text-decoration-line-through': todo.isDone,
-                      }"
-                      >{{ todo.title | capitalize }}</v-list-item-title
-                    >
-                    <v-list-item-subtitle
-                      >Created on
-                      {{ formattedDate(todo.createdAt) }}</v-list-item-subtitle
-                    >
-                  </v-list-item-content>
-
-                  <v-btn icon @click="toggleTodoFavourite(todo)" v-on="on">
-                    <v-icon v-model="todo.isFavourite" v-if="!todo.isDone">{{
-                      !todo.isFavourite ? 'mdi-heart-outline' : 'mdi-heart'
-                    }}</v-icon>
-                  </v-btn>
-
-                  <v-btn
-                    fab
-                    ripple
-                    small
-                    color="red"
-                    v-if="todo.isDone"
-                    @click="removeTodo(index)"
-                  >
-                    <v-icon class="white--text">mdi-close</v-icon>
-                  </v-btn>
-                </v-list-item>
+                <todo-details
+                  v-for="todo in todos"
+                  :key="todo.uuid"
+                  :index-todo="todo"
+                />
               </v-list-item-group>
             </v-list>
           </v-card>
@@ -104,9 +91,11 @@
 </template>
 
 <script>
-import { uuid } from 'vue-uuid'
+import AuthDialog from '@/components/Dialogs/AuthDialog.vue'
+import LogoutDialog from '@/components/Dialogs/LogoutDialog.vue'
 
 export default {
+  components: { AuthDialog, LogoutDialog },
   data() {
     return {
       isDark: false,
@@ -114,7 +103,31 @@ export default {
       newTodo: '',
       todos: [],
       todayDate: new Date(),
+      guestItems: [
+        {
+          title: 'Login',
+          action: () => (this.showAuthDialog = true),
+        },
+        { title: 'About', action: () => {} },
+      ],
+      authItems: [
+        { title: 'Share', action: () => {} },
+        { title: 'About', action: () => {} },
+        {
+          title: 'Logout',
+          action: () => (this.showLogoutDialog = true),
+        },
+      ],
+      showAuthDialog: false,
+      showLogoutDialog: false,
     }
+  },
+  computed: {
+    menuItems() {
+      return this.$store.getters.isAuthenticated
+        ? this.authItems
+        : this.guestItems
+    },
   },
   created() {
     this.todos = this.$store.getters.todos
@@ -127,54 +140,34 @@ export default {
       }
 
       const todo = {
-        id: uuid.v1(),
         title: this.newTodo,
         isDone: false,
         isFavourite: false,
         createdAt: new Date(),
       }
 
-      this.$store.commit('addTodo', todo)
-      this.newTodo = ''
+      this.$store.dispatch('addTodo', todo).then(() => {
+        this.newTodo = ''
+      })
     },
-
-    updateTodo(todo) {
-      this.$store.commit('editTodo', todo)
-    },
-
-    removeTodo(index) {
-      this.$store.commit('removeTodo', index)
-    },
-
-    toggleTodoDone(todo) {
-      todo.isDone = !todo.isDone
-      this.updateTodo(todo)
-    },
-
-    toggleTodoFavourite(todo) {
-      todo.isFavourite = !todo.isFavourite
-      this.updateTodo(todo)
-    },
-
     formattedDate(date) {
-      return (
-        this.$todoDay(date) +
-        ', ' +
-        date.getDate() +
-        this.$todoDayOrder(date) +
-        ' ' +
-        this.$todoMonth(date) +
-        ' ' +
-        date.getFullYear()
-      )
-    },
-  },
+      let formattedDate
+      if (date instanceof Date) {
+        formattedDate = date
+      } else {
+        formattedDate = new Date(date)
+      }
 
-  filters: {
-    capitalize(value) {
-      if (!value) return ''
-      value = value.toString()
-      return value.charAt(0).toUpperCase() + value.slice(1)
+      return (
+        this.$todoDay(formattedDate) +
+        ', ' +
+        formattedDate.getDate() +
+        this.$todoDayOrder(formattedDate) +
+        ' ' +
+        this.$todoMonth(formattedDate) +
+        ' ' +
+        formattedDate.getFullYear()
+      )
     },
   },
 }

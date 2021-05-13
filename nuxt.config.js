@@ -68,4 +68,31 @@ export default {
 
   // Build Configuration: https://go.nuxtjs.dev/config-build
   build: {},
+  router: {
+    middleware: 'check-auth',
+  },
+
+  env: {
+    baseUrl:
+      process.env.BASE_URL ||
+      'https://duriseo-7552f-default-rtdb.asia-southeast1.firebasedatabase.app/',
+    fbAPIKey: 'AIzaSyB4nsVm1Kv7BB-96o2Ek8_nQv4_69eXICI',
+  },
+  // serverMiddleware: [bodyParser.json(), '~/api'],
+  // generate: {
+  //   routes: function () {
+  //     return axios
+  //       .get('https://nuxt-blog.firebaseio.com/posts.json')
+  //       .then((res) => {
+  //         const routes = []
+  //         for (const key in res.data) {
+  //           routes.push({
+  //             route: '/posts/' + key,
+  //             payload: { postData: res.data[key] },
+  //           })
+  //         }
+  //         return routes
+  //       })
+  //   },
+  // },
 }
