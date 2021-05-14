@@ -60,16 +60,9 @@ const actions = {
       .then((data) => {
         vuexContext.commit('addTodo', { uuid: data.name, ...todo })
       })
-      .catch((error) => console.error(error))
   },
   editTodo(vuexContext, todo) {
     const token = localStorage.getItem('token')
-    const editedTodo = {
-      title: todo.title,
-      isDone: todo.isDone,
-      isFavourite: todo.isFavourite,
-      createdAt: todo.createdAt,
-    }
     return this.$axios
       .$put(
         'https://duriseo-7552f-default-rtdb.asia-southeast1.firebasedatabase.app/todos/' +
@@ -77,12 +70,16 @@ const actions = {
           '.json' +
           '?auth=' +
           token,
-        editedTodo
+        {
+          title: todo.title,
+          isDone: todo.isDone,
+          isFavourite: todo.isFavourite,
+          createdAt: todo.createdAt,
+        }
       )
       .then((data) => {
-        vuexContext.commit('editTodo', { uuid: data.name, ...editedTodo })
+        vuexContext.commit('editTodo', { uuid: data.name, ...todo })
       })
-      .catch((error) => console.error(error))
   },
   deleteTodo(vuexContext, todo) {
     const token = localStorage.getItem('token')
@@ -97,7 +94,6 @@ const actions = {
       .then((data) => {
         vuexContext.commit('deleteTodo', todo)
       })
-      .catch((error) => console.error(error))
   },
 }
 

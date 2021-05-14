@@ -86,6 +86,8 @@
           </v-card>
         </v-col>
       </v-row>
+
+      <error-snackbar v-model="showErrorDialog" :message="errorMessage" />
     </v-container>
   </v-theme-provider>
 </template>
@@ -93,9 +95,10 @@
 <script>
 import AuthDialog from '@/components/Dialogs/AuthDialog.vue'
 import LogoutDialog from '@/components/Dialogs/LogoutDialog.vue'
+import ErrorSnackbar from '@/components/Snackbars/ErrorSnackbar.vue'
 
 export default {
-  components: { AuthDialog, LogoutDialog },
+  components: { AuthDialog, LogoutDialog, ErrorSnackbar },
   data() {
     return {
       isDark: false,
@@ -118,8 +121,10 @@ export default {
           action: () => (this.showLogoutDialog = true),
         },
       ],
+      errorMessage: '',
       showAuthDialog: false,
       showLogoutDialog: false,
+      showErrorDialog: false,
     }
   },
   computed: {
@@ -146,9 +151,15 @@ export default {
         createdAt: new Date(),
       }
 
-      this.$store.dispatch('addTodo', todo).then(() => {
-        this.newTodo = ''
-      })
+      this.$store
+        .dispatch('addTodo', todo)
+        .then(() => {
+          this.newTodo = ''
+        })
+        .catch((error) => {
+          this.errorMessage = this.$formatError(error)
+          this.showErrorDialog = true
+        })
     },
     formattedDate(date) {
       let formattedDate

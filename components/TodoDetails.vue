@@ -62,11 +62,15 @@ export default {
   },
   methods: {
     editTodo(todo) {
-      this.$store.dispatch('editTodo', todo)
+      this.$store.dispatch('editTodo', todo).catch((error) => {
+        alert(this.$formatError(error))
+      })
     },
 
     deleteTodo(todo) {
-      this.$store.dispatch('deleteTodo', todo)
+      this.$store.dispatch('deleteTodo', todo).catch((error) => {
+        alert(this.$formatError(error))
+      })
     },
 
     toggleTodoDone(todo) {

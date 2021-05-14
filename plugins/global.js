@@ -44,4 +44,11 @@ export default ({ app }, inject) => {
     ]
     return months[date.getMonth()]
   })
+
+  inject('formatError', function (error) {
+    const response = error.response
+    const errorMessage =
+      response.status + ' ' + response.statusText + ': ' + response.data.error
+    return errorMessage
+  })
 }
