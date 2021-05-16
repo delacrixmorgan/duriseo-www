@@ -3,6 +3,7 @@ import Cookie from 'js-cookie'
 const state = () => ({
   state: {
     token: null,
+    userId: null,
   },
 })
 
@@ -16,6 +17,9 @@ const mutations = {
   setToken(state, token) {
     state.token = token
   },
+  setUserId(state, userId) {
+    state.userId = userId
+  },
   clearToken(state) {
     state.token = null
   },
@@ -24,6 +28,7 @@ const mutations = {
 const actions = {
   initAuth(vuexContext, req) {
     let token
+    let userId
     let expirationDate
     if (req) {
       if (!req.headers.cookie) {
@@ -42,6 +47,7 @@ const actions = {
         .split('=')[1]
     } else if (process.client) {
       token = localStorage.getItem('token')
+      userId = localStorage.getItem('userId')
       expirationDate = localStorage.getItem('tokenExpiration')
     }
     if (new Date().getTime() > +expirationDate || !token) {
@@ -50,6 +56,7 @@ const actions = {
       return
     }
     vuexContext.commit('setToken', token)
+    vuexContext.commit('setUserId', userId)
   },
   authenticateUser(vuexContext, authData) {
     let authUrl =
@@ -69,13 +76,17 @@ const actions = {
       .then((result) => {
         vuexContext.commit('setToken', result.idToken)
         localStorage.setItem('token', result.idToken)
+
+        vuexContext.commit('setUserId', result.localId)
+        localStorage.setItem('userId', result.localId)
+
         localStorage.setItem(
           'tokenExpiration',
           new Date().getTime() + Number.parseInt(result.expiresIn) * 1000
         )
 
-        console.log('token: ' + result.idToken)
-        console.log('localStorage: ' + localStorage.getItem('token'))
+        // console.log('token: ' + result.idToken)
+        // console.log('localStorage: ' + localStorage.getItem('token'))
 
         Cookie.set('jwt', result.idToken)
         Cookie.set(

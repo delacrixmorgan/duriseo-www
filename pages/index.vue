@@ -134,8 +134,16 @@ export default {
         : this.guestItems
     },
   },
-  created() {
-    this.todos = this.$store.getters.todos
+  mounted() {
+    this.$store
+      .dispatch('fetchTodos')
+      .then(() => {
+        this.todos = this.$store.getters.todos
+      })
+      .catch((error) => {
+        this.errorMessage = this.$formatError(error)
+        this.showErrorDialog = true
+      })
   },
   methods: {
     addTodo() {

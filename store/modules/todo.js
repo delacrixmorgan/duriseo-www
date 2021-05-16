@@ -31,10 +31,35 @@ const mutations = {
 
 const actions = {
   nuxtServerInit(vuexContext) {
-    // return []
+    return []
+    // return this.$axios
+    //   .$get(
+    //     'https://duriseo-7552f-default-rtdb.asia-southeast1.firebasedatabase.app/todos.json' +
+    //       '?orderBy="userId"' +
+    //       '&' +
+    //       'equalTo="' +
+    //       user +
+    //       '"'
+    //   )
+    //   .then((data) => {
+    //     const todos = []
+    //     for (const key in data) {
+    //       todos.push({ uuid: key, ...data[key] })
+    //     }
+    //     vuexContext.commit('setTodos', todos)
+    //   })
+    //   .catch((error) => console.error(error))
+  },
+  fetchTodos(vuexContext) {
+    const user = localStorage.getItem('userId')
     return this.$axios
       .$get(
-        'https://duriseo-7552f-default-rtdb.asia-southeast1.firebasedatabase.app/todos.json'
+        'https://duriseo-7552f-default-rtdb.asia-southeast1.firebasedatabase.app/todos.json' +
+          '?orderBy="userId"' +
+          '&' +
+          'equalTo="' +
+          user +
+          '"'
       )
       .then((data) => {
         const todos = []
@@ -50,12 +75,14 @@ const actions = {
   },
   addTodo(vuexContext, todo) {
     const token = localStorage.getItem('token')
+    const user = localStorage.getItem('userId')
+
     return this.$axios
       .$post(
         'https://duriseo-7552f-default-rtdb.asia-southeast1.firebasedatabase.app/todos.json' +
           '?auth=' +
           token,
-        todo
+        { userId: user, ...todo }
       )
       .then((data) => {
         vuexContext.commit('addTodo', { uuid: data.name, ...todo })
