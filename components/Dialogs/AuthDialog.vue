@@ -107,17 +107,25 @@ export default {
         this.onSubmit(isLoginClicked)
       }
     },
-    onSubmit(isLoginClicked) {
-      this.$store
-        .dispatch('authenticateUser', {
+    async onSubmit(isLoginClicked) {
+      try {
+        await this.$store.dispatch('authenticateUser', {
           isLogin: isLoginClicked,
           email: this.email,
           password: this.password,
         })
-        .then(() => {
+      } catch (e) {
+        alert(e)
+        return
+      }
+
+      try {
+        await this.$store.dispatch('fetchTodos').then(() => {
           this.isVisible = false
         })
-        .catch((e) => alert(e))
+      } catch (e) {
+        alert(e)
+      }
     },
     onForgotPassword() {
       this.$store.dispatch('forgotPassword').then(() => {

@@ -32,8 +32,10 @@ export default {
   },
   methods: {
     onLogout() {
-      this.$store
-        .dispatch('logoutUser')
+      Promise.all([
+        this.$store.dispatch('logoutUserTodos'),
+        this.$store.dispatch('logoutUser'),
+      ])
         .then(() => {
           this.isVisible = false
         })

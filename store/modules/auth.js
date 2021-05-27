@@ -85,9 +85,6 @@ const actions = {
           new Date().getTime() + Number.parseInt(result.expiresIn) * 1000
         )
 
-        // console.log('token: ' + result.idToken)
-        // console.log('localStorage: ' + localStorage.getItem('token'))
-
         Cookie.set('jwt', result.idToken)
         Cookie.set(
           'expirationDate',
@@ -100,8 +97,6 @@ const actions = {
       .catch((e) => console.log(e))
   },
   forgotPassword() {
-    // https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode
-
     return this.$axios.$post(
       'https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key=' +
         process.env.fbAPIKey
@@ -113,6 +108,7 @@ const actions = {
     Cookie.remove('expirationDate')
     if (process.client) {
       localStorage.removeItem('token')
+      localStorage.removeItem('userId')
       localStorage.removeItem('tokenExpiration')
     }
   },

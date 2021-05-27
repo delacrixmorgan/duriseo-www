@@ -101,6 +101,7 @@ export default {
   components: { AuthDialog, LogoutDialog, ErrorSnackbar },
   data() {
     return {
+      userId: null,
       isDark: false,
       show: true,
       newTodo: '',
@@ -126,6 +127,9 @@ export default {
       showErrorDialog: false,
     }
   },
+  asyncData(context) {
+    return context.params.id
+  },
   computed: {
     menuItems() {
       return this.$store.getters.isAuthenticated
@@ -138,11 +142,12 @@ export default {
   },
   mounted() {
     this.$store
-      .dispatch('fetchTodos')
+      .dispatch('fetchTodos', this.$route.params.id)
       .then(() => {})
       .catch((error) => {
         this.errorMessage = this.$formatError(error)
         this.showErrorDialog = true
+        this.$router.push('/')
       })
   },
   methods: {

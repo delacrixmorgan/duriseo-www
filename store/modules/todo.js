@@ -27,6 +27,9 @@ const mutations = {
     )
     state.todos.splice(todoIndex, 1)
   },
+  clearTodos(state) {
+    state.todos.splice(0)
+  },
 }
 
 const actions = {
@@ -50,12 +53,22 @@ const actions = {
     //   })
     //   .catch((error) => console.error(error))
   },
-  fetchTodos(vuexContext) {
-    const user = localStorage.getItem('userId')
+  fetchTodos(vuexContext, userId) {
+    let user
+    if (userId == null) {
+      user = localStorage.getItem('userId')
+    } else {
+      user = userId
+    }
+    const token = localStorage.getItem('token')
+
     return this.$axios
       .$get(
         'https://duriseo-7552f-default-rtdb.asia-southeast1.firebasedatabase.app/todos.json' +
-          '?orderBy="userId"' +
+          '?auth=' +
+          token +
+          '&' +
+          'orderBy="userId"' +
           '&' +
           'equalTo="' +
           user +
@@ -68,7 +81,6 @@ const actions = {
         }
         vuexContext.commit('setTodos', todos)
       })
-      .catch((error) => console.error(error))
   },
   setTodos(vuexContext, todos) {
     vuexContext.commit('setTodos', todos)
@@ -102,6 +114,7 @@ const actions = {
           isDone: todo.isDone,
           isFavourite: todo.isFavourite,
           createdAt: todo.createdAt,
+          userId: todo.userId,
         }
       )
       .then((data) => {
@@ -121,6 +134,9 @@ const actions = {
       .then((data) => {
         vuexContext.commit('deleteTodo', todo)
       })
+  },
+  logoutUserTodos(vuexContext) {
+    vuexContext.commit('clearTodos')
   },
 }
 
