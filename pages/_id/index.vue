@@ -114,7 +114,6 @@ export default {
         { title: 'About', action: () => {} },
       ],
       authItems: [
-        { title: 'Share', action: () => {} },
         { title: 'About', action: () => {} },
         {
           title: 'Logout',

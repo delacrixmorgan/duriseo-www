@@ -13,8 +13,9 @@ export default ({ app }, inject) => {
   })
 
   inject('todoDayOrder', function (date) {
-    if (date > 3 && date < 21) return 'th'
-    switch (date % 10) {
+    const dateDay = date.getDate()
+    if (dateDay > 3 && dateDay < 21) return 'th'
+    switch (dateDay % 10) {
       case 1:
         return 'st'
       case 2:
