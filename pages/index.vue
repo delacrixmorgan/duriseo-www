@@ -21,6 +21,8 @@
                 </span>
               </v-tooltip>
 
+              <about-dialog v-model="showAboutDialog" />
+
               <auth-dialog v-model="showAuthDialog" />
 
               <logout-dialog v-model="showLogoutDialog" />
@@ -93,12 +95,18 @@
 </template>
 
 <script>
+import AboutDialog from '@/components/Dialogs/AboutDialog.vue'
 import AuthDialog from '@/components/Dialogs/AuthDialog.vue'
 import LogoutDialog from '@/components/Dialogs/LogoutDialog.vue'
 import ErrorSnackbar from '@/components/Snackbars/ErrorSnackbar.vue'
 
 export default {
-  components: { AuthDialog, LogoutDialog, ErrorSnackbar },
+  components: {
+    AboutDialog,
+    AuthDialog,
+    LogoutDialog,
+    ErrorSnackbar,
+  },
   data() {
     return {
       isDark: false,
@@ -110,17 +118,27 @@ export default {
           title: 'Login',
           action: () => (this.showAuthDialog = true),
         },
-        { title: 'About', action: () => {} },
+        {
+          title: 'About',
+          action: () => {
+            this.showAboutDialog = true
+          },
+        },
       ],
       authItems: [
-        { title: 'Share', action: () => {} },
-        { title: 'About', action: () => {} },
+        {
+          title: 'About',
+          action: () => {
+            this.showAboutDialog = true
+          },
+        },
         {
           title: 'Logout',
           action: () => (this.showLogoutDialog = true),
         },
       ],
       errorMessage: '',
+      showAboutDialog: false,
       showAuthDialog: false,
       showLogoutDialog: false,
       showErrorDialog: false,

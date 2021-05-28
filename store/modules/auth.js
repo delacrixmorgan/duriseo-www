@@ -32,6 +32,7 @@ const actions = {
     let expirationDate
     if (req) {
       if (!req.headers.cookie) {
+        vuexContext.dispatch('logoutUser')
         return
       }
       const jwtCookie = req.headers.cookie
@@ -90,16 +91,16 @@ const actions = {
           'expirationDate',
           new Date().getTime() + Number.parseInt(result.expiresIn) * 1000
         )
-        return this.$axios.$post('http://localhost:3000/api/track-data', {
-          data: 'Authenticated!',
-        })
       })
-      .catch((e) => console.log(e))
   },
-  forgotPassword() {
+  forgotPassword(vuexContext, authData) {
     return this.$axios.$post(
       'https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key=' +
-        process.env.fbAPIKey
+        process.env.fbAPIKey,
+      {
+        email: authData.email,
+        requestType: 'PASSWORD_RESET',
+      }
     )
   },
   logoutUser(vuexContext) {

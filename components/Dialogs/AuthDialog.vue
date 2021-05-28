@@ -12,7 +12,7 @@
               <v-text-field
                 v-model="email"
                 :rules="emailRules"
-                label="E-mail"
+                label="Email"
                 required
               ></v-text-field>
             </v-col>
@@ -25,6 +25,7 @@
                 name="input-10-1"
                 label="Password"
                 hint="At least 8 characters"
+                @keydown.enter="isValidToProceed(true)"
                 @click:append="show1 = !show1"
               ></v-text-field>
             </v-col>
@@ -33,17 +34,17 @@
                 x-large
                 block
                 :disabled="!valid"
-                color="success"
+                color="deep-purple accent-4"
                 @click.stop="isValidToProceed(true)"
               >
-                Login
+                <span class="white--text">Login</span>
               </v-btn>
               <v-btn
                 x-large
                 outlined
                 class="mt-4"
                 :disabled="!valid"
-                color="success"
+                color="deep-purple accent-4"
                 @click.stop="isValidToProceed(false)"
               >
                 Sign Up
@@ -54,7 +55,7 @@
                 text
                 class="mt-4"
                 :disabled="!valid"
-                color="primary"
+                color="error"
                 @click.stop="onForgotPassword"
               >
                 Forgot Password
@@ -79,12 +80,12 @@ export default {
       { name: 'Register', icon: 'mdi-account-outline' },
     ],
     valid: true,
-    email: 'delacrixmorgan@pm.me',
-    password: 'password',
+    email: '',
+    password: '',
     show1: false,
     emailRules: [
-      (v) => !!v || 'Required',
-      (v) => /.+@.+\..+/.test(v) || 'E-mail must be valid',
+      (v) => !!v || 'Required email address',
+      (v) => /.+@.+\..+/.test(v) || 'Email must be valid',
     ],
     passwordRules: {
       required: (value) => !!value || 'Required.',
@@ -120,7 +121,7 @@ export default {
       }
 
       try {
-        await this.$store.dispatch('fetchTodos').then(() => {
+        return await this.$store.dispatch('fetchTodos').then(() => {
           this.isVisible = false
         })
       } catch (e) {
@@ -128,9 +129,17 @@ export default {
       }
     },
     onForgotPassword() {
-      this.$store.dispatch('forgotPassword').then(() => {
-        this.isVisible = false
-      })
+      try {
+        this.$store
+          .dispatch('forgotPassword', {
+            email: this.email,
+          })
+          .then(() => {
+            this.isVisible = false
+          })
+      } catch (e) {
+        alert(e)
+      }
     },
     reset() {
       this.$refs.form.reset()

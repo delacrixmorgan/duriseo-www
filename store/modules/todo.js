@@ -1,3 +1,5 @@
+import { uuid } from 'vue-uuid'
+
 const state = () => ({
   todos: [],
 })
@@ -61,6 +63,9 @@ const actions = {
       user = userId
     }
     const token = localStorage.getItem('token')
+    if (token == null) {
+      return []
+    }
 
     return this.$axios
       .$get(
@@ -88,6 +93,9 @@ const actions = {
   addTodo(vuexContext, todo) {
     const token = localStorage.getItem('token')
     const user = localStorage.getItem('userId')
+    if (token == null) {
+      return vuexContext.commit('addTodo', { uuid: uuid.v1(), ...todo })
+    }
 
     return this.$axios
       .$post(
@@ -102,6 +110,10 @@ const actions = {
   },
   editTodo(vuexContext, todo) {
     const token = localStorage.getItem('token')
+    if (token == null) {
+      return vuexContext.commit('editTodo', todo)
+    }
+
     return this.$axios
       .$put(
         'https://duriseo-7552f-default-rtdb.asia-southeast1.firebasedatabase.app/todos/' +
@@ -123,6 +135,10 @@ const actions = {
   },
   deleteTodo(vuexContext, todo) {
     const token = localStorage.getItem('token')
+    if (token == null) {
+      return vuexContext.commit('deleteTodo', todo)
+    }
+
     return this.$axios
       .$delete(
         'https://duriseo-7552f-default-rtdb.asia-southeast1.firebasedatabase.app/todos/' +
