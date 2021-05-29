@@ -105,7 +105,11 @@ const actions = {
         { userId: user, ...todo }
       )
       .then((data) => {
-        vuexContext.commit('addTodo', { uuid: data.name, ...todo })
+        vuexContext.commit('addTodo', {
+          uuid: data.name,
+          userId: user,
+          ...todo,
+        })
       })
   },
   editTodo(vuexContext, todo) {
@@ -113,7 +117,6 @@ const actions = {
     if (token == null) {
       return vuexContext.commit('editTodo', todo)
     }
-
     return this.$axios
       .$put(
         'https://duriseo-7552f-default-rtdb.asia-southeast1.firebasedatabase.app/todos/' +
