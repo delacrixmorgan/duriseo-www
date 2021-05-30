@@ -6,7 +6,7 @@
   >
     <v-card class="pa-4">
       <v-card-text>
-        <v-form ref="loginForm" v-model="valid" lazy-validation>
+        <v-form ref="form" v-model="isValid" lazy-validation>
           <v-row>
             <v-col cols="12">
               <v-text-field
@@ -19,21 +19,21 @@
             <v-col cols="12">
               <v-text-field
                 v-model="password"
-                :append-icon="show1 ? 'mdi-eye' : 'mdi-eye-off'"
+                :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
                 :rules="[passwordRules.required, passwordRules.min]"
-                :type="show1 ? 'text' : 'password'"
+                :type="showPassword ? 'text' : 'password'"
                 name="input-10-1"
                 label="Password"
                 hint="At least 8 characters"
                 @keydown.enter="isValidToProceed(true)"
-                @click:append="show1 = !show1"
+                @click:append="showPassword = !showPassword"
               ></v-text-field>
             </v-col>
             <v-col>
               <v-btn
                 x-large
                 block
-                :disabled="!valid"
+                :disabled="!isValid"
                 color="deep-purple accent-4"
                 @click.stop="isValidToProceed(true)"
               >
@@ -43,7 +43,7 @@
                 x-large
                 outlined
                 class="mt-4"
-                :disabled="!valid"
+                :disabled="!isValid"
                 color="deep-purple accent-4"
                 @click.stop="isValidToProceed(false)"
               >
@@ -54,7 +54,7 @@
                 x-large
                 text
                 class="mt-4"
-                :disabled="!valid"
+                :disabled="!isValid"
                 color="error"
                 @click.stop="onForgotPassword"
               >
@@ -74,22 +74,17 @@ export default {
     value: Boolean,
   },
   data: () => ({
-    tab: 0,
-    tabs: [
-      { name: 'Login', icon: 'mdi-account' },
-      { name: 'Register', icon: 'mdi-account-outline' },
-    ],
-    valid: true,
+    isValid: true,
     email: '',
     password: '',
-    show1: false,
+    showPassword: false,
     emailRules: [
       (v) => !!v || 'Required email address',
       (v) => /.+@.+\..+/.test(v) || 'Email must be valid',
     ],
     passwordRules: {
-      required: (value) => !!value || 'Required.',
-      min: (v) => (v && v.length >= 8) || 'Min 8 characters',
+      required: (value) => !!value || 'Required password.',
+      min: (v) => (v && v.length >= 8) || 'Minimum 8 characters',
     },
   }),
   computed: {
@@ -104,17 +99,21 @@ export default {
   },
   methods: {
     isValidToProceed(isLoginClicked) {
-      if (this.$refs.loginForm.validate()) {
+      if (this.$refs.form.validate()) {
         this.onSubmit(isLoginClicked)
       }
     },
     async onSubmit(isLoginClicked) {
       try {
-        await this.$store.dispatch('authenticateUser', {
-          isLogin: isLoginClicked,
-          email: this.email,
-          password: this.password,
-        })
+        await this.$store
+          .dispatch('authenticateUser', {
+            isLogin: isLoginClicked,
+            email: this.email,
+            password: this.password,
+          })
+          .then(() => {
+            this.reset()
+          })
       } catch (e) {
         alert(e)
         return
@@ -143,9 +142,6 @@ export default {
     },
     reset() {
       this.$refs.form.reset()
-    },
-    resetValidation() {
-      this.$refs.form.resetValidation()
     },
   },
 }
